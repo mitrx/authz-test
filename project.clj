@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [metosin/compojure-api "1.1.9"]
                  [http-kit "2.2.0"]
-                 [com.cerner/clara-rules "0.15.1"]
+                 [ring/ring-mock "0.3.0"]
                  [mount "0.1.11"]]
 
   :main ^:skip-aot authz-test.core
