@@ -11,11 +11,6 @@
 (defn get-organization [organization-id]
   (first (filter #(= (:organization-id %) organization-id) organizations)))
 
-(defn get-matching-element [x match-col k]
-  (first (filter #(= (k x) (k %)) match-col)))
-
-(get-matching-element {:organization-id 2} organizations :organization-id)
-
 (defn join-maps [m merge-m k merge-k]
   (let [merge-col (map
                    (fn [x] (first (filter #(= (k x) (merge-k %)) merge-m)))
