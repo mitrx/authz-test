@@ -11,4 +11,10 @@
                            :role "worker"}
                           {:user-id 4
                            :organization-id 1
+                           :role "user"}
+                          {:user-id 4
+                           :organization-id 2
                            :role "user"}])
+
+(defn get-users-organization-roles [user-id]
+  (filter #(= user-id (:user-id %)) roles-organizations))
