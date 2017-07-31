@@ -7,7 +7,10 @@
                  [metosin/compojure-api "1.1.9"]
                  [http-kit "2.2.0"]
                  [ring/ring-mock "0.3.0"]
-                 [mount "0.1.11"]]
+                 [mount "0.1.11"]
+                 [yada "1.2.0"]
+                 [aleph "0.4.1"]
+                 [bidi "2.0.12"]]
 
   :main ^:skip-aot authz-test.core
   :target-path "target/%s"
