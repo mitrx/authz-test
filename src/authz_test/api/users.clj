@@ -1,32 +1,32 @@
 (ns authz-test.api.users
-  (:require [compojure.api.sweet :refer [context defroutes GET]]
+  (:require [authz-test.db.users :refer [users]]
+            [ring.util.http-response :as resp]
             [schema.core :as sc]
-            [authz-test.db.users :refer [users]]
-            [ring.util.http-response :as resp]))
-
-(defn resp-ok-users [users]
-  (resp/ok {:users users}))
+            [yada.yada :as yada]))
 
 (defn get-user-by-email [email]
   (filter #(= email (:email %)) users))
 
-(defn get-users [filters]
-  (let [users (if (:email filters)
-                (get-user-by-email (:email filters))
+(defn get-users [ctx]
+  (let [users (if (:email ctx)
+                (get-user-by-email (:email ctx))
                 users)]
-    (resp-ok-users users)))
+    users))
 
-(defn get-user-by-id [id]
-  (let [users (first (filter #(= id (:user-id %)) users))]
-    (if-not (empty? users)
-      (resp-ok-users users)
-      (resp/not-found {:error {:message "no-such-user"}}))))
+(defn get-user-by-id [ctx]
+  (let [msg (clojure.pprint/pprint ctx)
+        id (-> ctx :parameters :path :user-id)
+        users (filter #(= id (:user-id %)) users)]
+    (when-not (empty? users)
+      (first users))))
 
-(defroutes users-routes
-  (context "/users" []
-           (GET "/" []
-                :query-params [{email :- sc/Str nil}]
-                (get-users {:email email}))
-           (GET "/:id" [id]
-                :path-params [id :- Long]
-                (get-user-by-id id))))
+(def user-resource
+  (yada/resource {:produces #{"application/json" "text/plain;q=0.9"}
+                  :parameters {:path {:user-id Long}}
+                  :methods {:get {:response get-user-by-id}}
+                  :responses {404 {:produces #{"application/json"}
+                                   :response {:description "no-such-user"}}}}))
+
+(def users-resource
+  (yada/resource {:produces {:media-type "application/json"}
+                  :methods {:get {:response get-users}}}))

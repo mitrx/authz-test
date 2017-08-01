@@ -8,26 +8,30 @@
             [mount.core :refer [defstate]]
             [org.httpkit.server :as httpkit]
             [ring.util.http-response :as resp]
-            [schema.core :as sc]))
+            [schema.core :as sc]
+            [yada.yada :as yada]))
 
-(defapi app
-  (context "/api" []
-           :middleware [authorization/wrap-abac-authorization]
-           users/users-routes
-           (context "/issues" []
-                    (GET "/" []
-                         (resp/ok {:issues (issues/get-issues)}))
-                    (GET "/:issue-id" [issue-id]
-                         :path-params [issue-id :- Long]
-                         :body-params [user-id :- Long
-                                       issue-id :- Long]
-                         (resp/ok {:issue (issues/get-issue issue-id)})))
-           (GET "/organizations" []
-                (resp/ok {:organizations (organizations/get-organizations)}))))
+(defn start-yada []
+  (yada/listener
+   ["/"
+    [
+     ["users" [
+               ["" users/users-resource]
+               [["/" :user-id] users/user-resource]]]
+     ["issues" [
+                ["" issues/issues-resource]
+                [["/" :issue-id] issues/issue-resource]]]
+     ["organizations" [
+                       ["" organizations/organizations-resource]
+                       [["/" :organization-id]
+                        organizations/organization-resource]]]
+     ["hello" (yada/as-resource "Hello, World!")]
+     [true (yada/as-resource nil)]]]
+   {:port 5000}))
 
-(defstate server
-  :start (httpkit/run-server #'app {:port 5000})
-  :stop (server))
+(defstate yada-server
+  :start (start-yada)
+  :stop ((:close yada-server)))
 
 (defn -main [& args]
   (mount.core/start))
