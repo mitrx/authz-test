@@ -11,27 +11,27 @@
             [schema.core :as sc]
             [yada.yada :as yada]))
 
-(defn start-yada []
-  (yada/listener
-   ["/"
-    [
-     ["users" [
-               ["" users/users-resource]
-               [["/" :user-id] users/user-resource]]]
-     ["issues" [
-                ["" issues/issues-resource]
-                [["/" :issue-id] issues/issue-resource]]]
-     ["organizations" [
-                       ["" organizations/organizations-resource]
-                       [["/" :organization-id]
-                        organizations/organization-resource]]]
-     ["hello" (yada/as-resource "Hello, World!")]
-     [true (yada/as-resource nil)]]]
-   {:port 5000}))
+(def routes ["/"
+             [
+              ["users" [
+                        ["" users/users-resource]
+                        [["/" :user-id] users/user-resource]]]
+              ["issues" [
+                         ["" issues/issues-resource]
+                         [["/" :issue-id] issues/issue-resource]]]
+              ["organizations" [
+                                ["" organizations/organizations-resource]
+                                [["/" :organization-id]
+                                 organizations/organization-resource]]]
+              ["hello" (yada/as-resource "Hello, World!")]
+              [true (yada/as-resource nil)]]])
 
-(defstate yada-server
-  :start (start-yada)
-  :stop ((:close yada-server)))
+(defn start []
+  (yada/listener routes {:port 5000}))
+
+(defstate server
+  :start (start)
+  :stop ((:close server)))
 
 (defn -main [& args]
   (mount.core/start))
