@@ -9,22 +9,23 @@
             [org.httpkit.server :as httpkit]
             [ring.util.http-response :as resp]
             [schema.core :as sc]
-            [yada.yada :as yada]))
+            [yada.yada :as yada]
+            [yada.swagger :as swagger :refer [swaggered]]))
 
-(def routes ["/"
-             [
-              ["users" [
-                        ["" users/users-resource]
-                        [["/" :user-id] users/user-resource]]]
-              ["issues" [
-                         ["" issues/issues-resource]
-                         [["/" :issue-id] issues/issue-resource]]]
-              ["organizations" [
-                                ["" organizations/organizations-resource]
-                                [["/" :organization-id]
-                                 organizations/organization-resource]]]
-              ["hello" (yada/as-resource "Hello, World!")]
-              [true (yada/as-resource nil)]]])
+(def routes ["/api"
+             (swaggered
+              [""
+               [["/users" [["" users/users-resource]
+                           [["/" :user-id] users/user-resource]]]
+                ["/issues" [["" issues/issues-resource]
+                            [["/" :issue-id] issues/issue-resource]]]
+                ["/organizations" [["" organizations/organizations-resource]
+                                   [["/" :organization-id]
+                                    organizations/organization-resource]]]]]
+              {:info {:title "Authorization test"
+                      :version "0.1"
+                      :description "Prototyping ABAC authorization with yada"}
+               :basePath "/api"})])
 
 (defn start []
   (yada/listener routes {:port 5000}))
