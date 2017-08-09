@@ -16,3 +16,11 @@
              :email "user@urbest.io"
              :full-name "Mr. Worker"
              :password "secret"}])
+
+(defn get-user-by-email [email]
+  (filter #(= email (:email %)) users))
+
+(defn get-users [] users)
+
+(defn get-user-by-id [id]
+  (filter #(= id (:user-id %)) users))
