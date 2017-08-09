@@ -10,7 +10,8 @@
                  [mount "0.1.11"]
                  [yada "1.2.0"]
                  [aleph "0.4.1"]
-                 [bidi "2.0.12"]]
+                 [bidi "2.0.12"]
+                 [buddy "1.3.0"]]
 
   :main ^:skip-aot authz-test.core
   :target-path "target/%s"
