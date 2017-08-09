@@ -1,22 +1,23 @@
 (ns authz-test.api.users
-  (:require [authz-test.db.users :refer [users]]
+  (:require [authz-test.db.users :as users]
             [ring.util.http-response :as resp]
             [schema.core :as sc]
-            [yada.yada :as yada]))
+            [yada.yada :as yada]
+            [authz-test.db.users :as users]))
 
 (defn get-user-by-email [email]
-  (filter #(= email (:email %)) users))
+  (-> (users/get-user-by-email email)
+      first))
 
 (defn get-users [ctx]
   (let [users (if (:email ctx)
                 (get-user-by-email (:email ctx))
-                users)]
+                (get-users))]
     users))
 
 (defn get-user-by-id [ctx]
-  (let [msg (clojure.pprint/pprint ctx)
-        id (-> ctx :parameters :path :user-id)
-        users (filter #(= id (:user-id %)) users)]
+  (let [id (-> ctx :parameters :path :user-id)
+        users (users/get-user-by-id id)]
     (when-not (empty? users)
       (first users))))
 

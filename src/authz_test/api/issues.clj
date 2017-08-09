@@ -11,13 +11,14 @@
     (issues/get-issue issue-id)))
 
 (def issues-resource
-  (yada/resource {:produces {:media-type "application/json"}
+  (yada/resource {:id :authz-test.resources/issues
+                  :produces {:media-type "application/json"}
                   :methods {:get {:response get-issues}}}))
 
 (defn get-issue-properties [ctx]
   (let [params (-> ctx :parameters)
         issue-id (-> params :path :issue-id)
-        user-id (-> params :query :user-id)
+        user-id (-> ctx :authentication (get "default") :user-id)
         issue (issues/get-issue issue-id)
         user-orgs (organizations/get-user-organizations user-id)
         issue-org-id (:organization-id issue)
@@ -29,15 +30,20 @@
      :issues/issue-responsible? (= user-id (:responsible-id issue))}))
 
 (def issue-resource
-  (yada/resource {:produces #{"application/json"}
-                  :parameters {:path {:issue-id Long}
-                               :query {:user-id Long}}
-                  :properties get-issue-properties
-                  :access-control {:authorization
-                                   {:scheme :authz-test/abac
-                                    :predicate [:or :users/organization-member?
-                                                :issues/issue-author?
-                                                :issues/issue-responsible?]}}
-                  :methods {:get {:response (fn [ctx] (-> ctx :properties :issues/issue))}}
-                  :responses {404 {:produces #{"application/json"}
-                                   :response {:description "no-such-issue"}}}}))
+  (yada/resource
+   {:id :authz-test.resources/issue
+    :produces #{"application/json"}
+    :parameters {:path {:issue-id Long}
+                 :cookie [:session String]}
+    :properties get-issue-properties
+    :access-control {:scheme :authz-test/cookie-auth
+                     :authorization
+                     {:scheme :authz-test/abac
+                      :predicate [:or :users/organization-member?
+                                  :issues/issue-author?
+                                  :issues/issue-responsible?]}}
+    :methods {:get {:response (fn [ctx] (-> ctx :properties :issues/issue))}}
+    :responses {404 {:produces "application/json"
+                     :response {:description "no-such-issue"}}
+                403 {:produces "application/json"
+                     :response {:description "access-denied"}}}}))
