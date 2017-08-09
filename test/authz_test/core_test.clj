@@ -11,12 +11,7 @@
 
 (deftest general-case-authorization
   (testing "General case authorization"
-    (let [; req (-> (mock/request :get "/api/issues/1")
-          ;         (mock/content-type "application/json")
-          ;         (mock/body (json/generate-string {:user-id 4
-          ;                                           :issue-id 2})))
-          resp (yada/response-for routes :get (str "/issues/" 1))
-          body (get-json-from-response resp)
-          ]
+    (let [resp (yada/response-for routes :get (str "/issues/" 1))
+          body (get-json-from-response resp)]
       (clojure.pprint/pprint body)
       (is (= 200 (:status resp))))))
